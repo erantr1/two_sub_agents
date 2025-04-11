@@ -1,0 +1,21 @@
+# .gitignore
+
+# IDE (PyCharm) files
+.idea/
+*.iml
+/shelf/
+/workspace.xml
+/httpRequests/
+/dataSources/
+/dataSources.local.xml
+
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
