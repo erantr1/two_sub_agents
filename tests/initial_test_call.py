@@ -1,3 +1,3 @@
-from src.app import alt_main
+from src.app import main
 
-alt_main.task_topic()
+main.task_topic()

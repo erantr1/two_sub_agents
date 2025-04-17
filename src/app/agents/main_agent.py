@@ -14,6 +14,7 @@ class SubTasks(BaseModel):
     raw_info_sub_task: str
     process_info_sub_task: str
 
+
 @mcp.tool()
 def create_sub_tasks(json_task: dict):
     instructions = """
@@ -48,3 +49,9 @@ def create_sub_tasks(json_task: dict):
     )
     response_model = response.output[0].content[0].parsed
     return response_model.raw_info_sub_task, response_model.process_info_sub_task
+
+
+@mcp.tool()
+def create_and_orchestrate_sub_tasks(json_task: str):
+    raw_info_sub_task, process_info_sub_task = create_sub_tasks(json_task)
+    print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
