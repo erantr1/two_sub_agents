@@ -22,7 +22,10 @@ def get_raw_info(raw_info_sub_task: str):
         input=raw_info_sub_task,
         instructions=instructions
     )
+    response_model = response.output[0].content[0].text
+    ## if using BaseModel - response_model = response.output[0].content[0].parsed
 
-    # response_model = response.output[0].content[0].text
-    response_model = response.output[0].content[0].parsed
+    raw_info = []
+    ## raw_info.append() API calls with REST
+
     return response_model
