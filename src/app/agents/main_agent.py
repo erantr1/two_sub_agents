@@ -2,9 +2,11 @@ from openai import OpenAI
 from fastmcp import FastMCP
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from pprint import pprint
 import os
 
 from src.app.agents import raw_info_sub_agent, process_info_sub_agent
+from src.utils import structure_api
 
 load_dotenv()
 
@@ -57,19 +59,23 @@ def create_sub_tasks(json_task: dict):
 
 
 @mcp.tool()
-def find_apis(raw_info_sub_task: str):
-    instructions = """
-                You are given a user task. Suggest 1-3 public APIs that can help complete it.
-                The output should be a list of URLs.
-                """
-    response = client.responses.parse(
-        model="gpt-4o",
-        input=raw_info_sub_task,
-        instructions=instructions,
-        text_format=ApisList
-    )
-    response_model = response.output[0].content[0].parsed
-    return response_model.apis_list
+# def create_apis(raw_info_sub_task: str):
+    # instructions = """
+    #             You are given a user task. Suggest 1-3 public APIs that can help complete it.
+    #             The output should be a list of URLs.
+    #             """
+    # response = client.responses.parse(
+    #     model="gpt-4o",
+    #     input=raw_info_sub_task,
+    #     instructions=instructions,
+    #     text_format=ApisList
+    # )
+    # response_model = response.output[0].content[0].parsed
+    # return response_model.apis_list
+def create_apis():
+    url_temp = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"
+    params, headers = structure_api()
+    return url_temp, params, headers
 
 
 @mcp.tool()
@@ -77,12 +83,14 @@ def create_and_orchestrate_sub_tasks(json_task: str):
     raw_info_sub_task, process_info_sub_task = create_sub_tasks(json_task)
     print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
 
-    apis_list = find_apis(raw_info_sub_task)
-    print(f'apis list: {apis_list}')
+    # apis_list = create_apis(raw_info_sub_task)
+    # print(f'apis list: {apis_list}')
 
+    url_temp, params, headers = create_apis()
 
     # process_info_sub_agent.open_inter_agents_web_socket()
 
-    # raw_info_sub_agent.get_raw_info()
+    data = raw_info_sub_agent.get_raw_info(url_temp, params, headers)
+    pprint(data)
 
     # process_info_sub_agent.process_raw_info()
