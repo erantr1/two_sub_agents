@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 from pprint import pprint
 import os
+import asyncio, json, websockets
 
 from src.app.agents import raw_info_sub_agent, process_info_sub_agent
 from src.utils import structure_api
@@ -79,6 +80,15 @@ def create_apis():
 
 
 @mcp.tool()
+def talk(raw_info: dict) -> dict:
+    async def _ws():
+        async with websockets.connect("ws://127.0.0.1:8765") as ws:
+            await ws.send(json.dumps(raw_info))
+            return json.loads(await ws.recv())
+    return asyncio.run(_ws())
+
+
+@mcp.tool()
 def create_and_orchestrate_sub_tasks(json_task: str):
     raw_info_sub_task, process_info_sub_task = create_sub_tasks(json_task)
     print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
@@ -90,7 +100,12 @@ def create_and_orchestrate_sub_tasks(json_task: str):
 
     # process_info_sub_agent.open_inter_agents_web_socket()
 
-    data = raw_info_sub_agent.get_raw_info(url_temp, params, headers)
-    pprint(data)
+    raw_info = raw_info_sub_agent.get_raw_info(url_temp, params, headers)
+    pprint(raw_info)
+
+    processed_info = talk(raw_info)
+    print(processed_info)
+
+
 
     # process_info_sub_agent.process_raw_info()
