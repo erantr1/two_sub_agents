@@ -101,10 +101,10 @@ def create_and_orchestrate_sub_tasks(json_task: str):
     # process_info_sub_agent.open_inter_agents_web_socket()
 
     raw_info = raw_info_sub_agent.get_raw_info(url_temp, params, headers)
-    pprint(raw_info)
+    # pprint(raw_info)
 
     processed_info = talk(raw_info)
-    print(processed_info)
+    pprint(processed_info)
 
 
 

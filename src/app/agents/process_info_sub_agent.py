@@ -1,4 +1,5 @@
 import json
+from http.client import responses
 
 from langsmith.utils import with_cache
 from openai import OpenAI
@@ -16,8 +17,17 @@ mcp = FastMCP("Process Info Sub-Agent")
 
 @mcp.tool()
 def process_raw_info(info):
-    processed_info = "success"
-    return processed_info
+    instructions = """
+    You are given a JSON with events details.
+    Extract only live shows
+    """
+    response = client.responses.parse(
+        model="gpt-4o",
+        input=info,
+        instructions=instructions
+    )
+    response_model = response.output[0].content[0].text
+    return response_model
 
 
 async def handle(ws):
