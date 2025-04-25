@@ -8,7 +8,7 @@ def create_json_task(task:str, language: str):
         "content": task,
         "lang": language,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "context_id": uuid.uuid4(),
+        "context_id": str(uuid.uuid4()),
         "metadata": None
     }
     return json_task
