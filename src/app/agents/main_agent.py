@@ -8,7 +8,7 @@ import os
 import asyncio, json, websockets
 
 from src.app.agents import raw_info_sub_agent, process_info_sub_agent
-from src.utils import get_headers_and_params
+from src.utils import get_headers_and_params, MCPTask
 from src.utils import create_mcp_task
 
 load_dotenv()
@@ -21,12 +21,9 @@ class SubTasks(BaseModel):
     raw_info_sub_task: str
     process_info_sub_task: str
 
-class ApisList(BaseModel):
-    apis_list: list
-
 
 @mcp.tool()
-def create_sub_tasks(mcp_task: dict):
+def create_sub_tasks(mcp_task: MCPTask):
     instructions = """
                 Determine if the user input is a valid information request or query.
                 If it is a valid request, divide it into 2 sub-tasks. 
@@ -53,7 +50,7 @@ def create_sub_tasks(mcp_task: dict):
     # make sure that sub-tasks are in the same language as the original
     response = client.responses.parse(
         model="gpt-4o",
-        input=mcp_task["content"],
+        input=mcp_task.content,
         instructions=instructions,
         text_format=SubTasks
     )
@@ -91,13 +88,13 @@ def talk(raw_info: dict) -> dict:
 
 
 @mcp.tool()
-def create_and_orchestrate_sub_tasks(mcp_task: dict):
+def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     raw_info_sub_task, process_info_sub_task = create_sub_tasks(mcp_task)
 
     raw_info_sub_task_mcp = create_mcp_task(message_type="raw info task", task=raw_info_sub_task,
-                                            language=mcp_task["lang"])
+                                            language=mcp_task.lang)
     process_info_sub_task_mcp = create_mcp_task(message_type="process info task", task=process_info_sub_task,
-                                            language=mcp_task["lang"])
+                                            language=mcp_task.lang)
 
     print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
     pprint(f'task 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
@@ -109,7 +106,7 @@ def create_and_orchestrate_sub_tasks(mcp_task: dict):
     # events_url, params, headers = create_apis()
 
     response = requests.post("http://localhost:8000/api/raw-info",
-                            json=raw_info_sub_task_mcp)
+                            json=raw_info_sub_task_mcp.model_dump())
     raw_info = response.json()
     pprint(raw_info)
 

@@ -1,16 +1,29 @@
 import datetime
 import uuid
+from typing import Type
+
+from pydantic import BaseModel
 
 
-def create_mcp_task(message_type:str, task:str, language: str) -> dict:
-    mcp_task = {
-        "type": message_type,
-        "content": task,
-        "lang": language,
-        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "context_id": str(uuid.uuid4()),
-        "metadata": {}
-    }
+class MCPTask(BaseModel):
+    type: str
+    content: str
+    lang: str
+    timestamp: str
+    context_id: str
+    metadata: dict
+
+
+def create_mcp_task(message_type:str, task:str, language: str) -> MCPTask:
+    mcp_task = MCPTask(
+        type=message_type,
+        content=task,
+        lang=language,
+        timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        context_id=str(uuid.uuid4()),
+        metadata={}
+    )
+
     return mcp_task
 
 

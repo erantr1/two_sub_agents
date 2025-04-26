@@ -8,7 +8,7 @@ from fastmcp import FastMCP
 from openai import OpenAI
 from pydantic import BaseModel
 from src.app.agents import main_agent
-from src.utils import create_mcp_task
+from src.utils import MCPTask, create_mcp_task
 from typing import Optional
 import os
 import logging
@@ -19,7 +19,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 mcp = FastMCP("Task Orchestration")
 
 @mcp.tool()
-def detect_language_and_create_mcp_task(message_type:str, task: str) -> dict:
+def detect_language_and_create_mcp_task(message_type:str, task: str) -> MCPTask:
     """Detect the task's language and create a standardized MCP message"""
     is_reliable, _, details = cld2.detect(task) ## maybe get lang from user
     if is_reliable and details:
