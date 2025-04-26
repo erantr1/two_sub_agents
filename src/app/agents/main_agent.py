@@ -1,3 +1,4 @@
+import requests
 from openai import OpenAI
 from fastmcp import FastMCP
 from dotenv import load_dotenv
@@ -7,7 +8,8 @@ import os
 import asyncio, json, websockets
 
 from src.app.agents import raw_info_sub_agent, process_info_sub_agent
-from src.utils import structure_api
+from src.utils import get_headers_and_params
+from src.utils import create_mcp_task
 
 load_dotenv()
 
@@ -24,7 +26,7 @@ class ApisList(BaseModel):
 
 
 @mcp.tool()
-def create_sub_tasks(json_task: dict):
+def create_sub_tasks(mcp_task: dict):
     instructions = """
                 Determine if the user input is a valid information request or query.
                 If it is a valid request, divide it into 2 sub-tasks. 
@@ -51,7 +53,7 @@ def create_sub_tasks(json_task: dict):
     # make sure that sub-tasks are in the same language as the original
     response = client.responses.parse(
         model="gpt-4o",
-        input=json_task["content"],
+        input=mcp_task["content"],
         instructions=instructions,
         text_format=SubTasks
     )
@@ -59,7 +61,7 @@ def create_sub_tasks(json_task: dict):
     return response_model.raw_info_sub_task, response_model.process_info_sub_task
 
 
-@mcp.tool()
+# @mcp.tool()
 # def create_apis(raw_info_sub_task: str):
     # instructions = """
     #             You are given a user task. Suggest 1-3 public APIs that can help complete it.
@@ -73,10 +75,10 @@ def create_sub_tasks(json_task: dict):
     # )
     # response_model = response.output[0].content[0].parsed
     # return response_model.apis_list
-def create_apis():
-    url_temp = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"
-    params, headers = structure_api()
-    return url_temp, params, headers
+# def create_apis():
+#     events_url = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"
+#     params, headers = structure_api()
+#     return events_url, params, headers
 
 
 @mcp.tool()
@@ -89,22 +91,30 @@ def talk(raw_info: dict) -> dict:
 
 
 @mcp.tool()
-def create_and_orchestrate_sub_tasks(json_task: str):
-    raw_info_sub_task, process_info_sub_task = create_sub_tasks(json_task)
+def create_and_orchestrate_sub_tasks(mcp_task: dict):
+    raw_info_sub_task, process_info_sub_task = create_sub_tasks(mcp_task)
+
+    raw_info_sub_task_mcp = create_mcp_task(message_type="raw info task", task=raw_info_sub_task,
+                                            language=mcp_task["lang"])
+    process_info_sub_task_mcp = create_mcp_task(message_type="process info task", task=process_info_sub_task,
+                                            language=mcp_task["lang"])
+
     print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
+    pprint(f'task 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
+
 
     # apis_list = create_apis(raw_info_sub_task)
     # print(f'apis list: {apis_list}')
 
-    url_temp, params, headers = create_apis()
+    # events_url, params, headers = create_apis()
 
-    # process_info_sub_agent.open_inter_agents_web_socket()
+    response = requests.post("http://localhost:8000/api/raw-info",
+                            json=raw_info_sub_task_mcp)
+    raw_info = response.json()
+    pprint(raw_info)
 
-    raw_info = raw_info_sub_agent.get_raw_info(url_temp, params, headers)
-    # pprint(raw_info)
-
-    processed_info = talk(raw_info)
-    pprint(processed_info)
+    # processed_info = talk(raw_info)
+    # pprint(processed_info)
 
 
 
