@@ -41,13 +41,12 @@ def create_sub_tasks(mcp_task: MCPTask):
                 - Instructions to perform physical actions that an AI system cannot do
 
                 Sub-tasks division:
-                - The 1st sub-task should focus on gathering raw information that is relevant for the user's needs.
-                - The 2nd sub-task should focus on filtering, processing and analyzing the raw info collected in
-                  sub-task 1 in order to adjust the output for the user's needs 
-                
-                Note: both sub-tasks should be in the same language of the original task.
+                - The 1st sub-task should focus on gathering raw information through external data sources using REST API calls. This includes identifying what data needs to be retrievedץ It should EXPLICITLY extract and include all key parameters needed for the API query, such as: locations, dates, event types, categories, or any other search criteria mentioned by the user. Be as specific as possible about these parameters as they will be used to construct API calls. This task will be handled by a dedicated agent that specializes in REST API interactions.
+                - The 2nd sub-task should focus on filtering, processing, and analyzing the raw info collected in sub-task 1 to generate insights tailored to the user's needs. It should EXPLICITLY specify what aspects of the data to prioritize, how to rank or filter results, what preferences to consider, and what format the final recommendations should take. This task will be handled by an agent that specializes in data processing and real-time analysis via WebSocket connections.
+
+                Note: both sub-tasks should be in the same language as the original task.
                 """
-    # make sure that sub-tasks are in the same language as the original
+    ## make sure that sub-tasks are in the same language as the original
     response = client.responses.parse(
         model="gpt-4o",
         input=mcp_task.content,
@@ -57,25 +56,6 @@ def create_sub_tasks(mcp_task: MCPTask):
     response_model = response.output[0].content[0].parsed
     return response_model.raw_info_sub_task, response_model.process_info_sub_task
 
-
-# @mcp.tool()
-# def create_apis(raw_info_sub_task: str):
-    # instructions = """
-    #             You are given a user task. Suggest 1-3 public APIs that can help complete it.
-    #             The output should be a list of URLs.
-    #             """
-    # response = client.responses.parse(
-    #     model="gpt-4o",
-    #     input=raw_info_sub_task,
-    #     instructions=instructions,
-    #     text_format=ApisList
-    # )
-    # response_model = response.output[0].content[0].parsed
-    # return response_model.apis_list
-# def create_apis():
-#     events_url = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"
-#     params, headers = structure_api()
-#     return events_url, params, headers
 
 
 @mcp.tool()
@@ -99,20 +79,17 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
     pprint(f'task 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
 
+    try:
+        response = requests.post("http://localhost:8000/api/raw-info",
+                                json=raw_info_sub_task_mcp.model_dump())
+        response.raise_for_status()
+        raw_info = response.json()
+        pprint(raw_info)
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling raw-info endpoint: {e}")
 
-    # apis_list = create_apis(raw_info_sub_task)
-    # print(f'apis list: {apis_list}')
-
-    # events_url, params, headers = create_apis()
-
-    response = requests.post("http://localhost:8000/api/raw-info",
-                            json=raw_info_sub_task_mcp.model_dump())
-    raw_info = response.json()
-    pprint(raw_info)
 
     # processed_info = talk(raw_info)
     # pprint(processed_info)
-
-
 
     # process_info_sub_agent.process_raw_info()
