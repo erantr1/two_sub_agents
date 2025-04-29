@@ -1,8 +1,8 @@
 import datetime
 import uuid
-from typing import Type
+from typing import Type, Optional, List, Callable
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 
 class MCPTask(BaseModel):
@@ -12,6 +12,30 @@ class MCPTask(BaseModel):
     timestamp: str
     context_id: str
     metadata: dict
+
+
+class SearchParameters(BaseModel):
+    location: str
+    #     = Field(
+    #     description="The city or area for the events",
+    #     examples=["Tel Aviv", "Jerusalem"],
+    # )
+    timeframe: str
+        # (Optional)[str] = Field(
+        # default=None,
+        # description="When the events should take place",
+        # examples=["this weekend", "next Thursday", "tomorrow night"],
+    # )
+    # event_types: List[str] = Field(
+    #     default_factory=list,
+    #     description="Types of events mentioned",
+    #     examples=[["concerts", "live music"], ["art exhibitions"], ["food festivals"]],
+    # )
+    # preferences: List[str] = Field(
+    #     default_factory=list,
+    #     description="Specific preferences or requirements",
+    #     examples=[["family friendly", "outdoors"], ["low cost"], ["accessible venue"]],
+    # )
 
 
 def create_mcp_task(message_type:str, task:str, language: str) -> MCPTask:
@@ -28,7 +52,7 @@ def create_mcp_task(message_type:str, task:str, language: str) -> MCPTask:
 
 
 
-def get_headers_and_params(raw_info_sub_task: str):
+def get_headers_and_params(extracted_params: SearchParameters):
     ## Extract relevant params from raw_info_sub_task
 
     params = {
