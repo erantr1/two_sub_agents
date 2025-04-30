@@ -5,6 +5,19 @@ from typing import Type, Optional, List, Callable
 from pydantic import BaseModel, Field, field_validator
 
 
+cities_dict = {
+    "באר-שבע": "308",
+    "בנימינה": "1957",
+    "הרצליה": "314",
+    "זכרון-יעקב": "1948",
+    "חיפה": "307",
+    "ירושלים": "306",
+    "קיסריה": "1573",
+    "ראשון-לציון": "1951",
+    "תל-אביב": "249",
+}
+
+
 class MCPTask(BaseModel):
     type: str
     content: str
@@ -52,7 +65,7 @@ def create_mcp_task(message_type:str, task:str, language: str) -> MCPTask:
 
 
 
-def get_headers_and_params(extracted_params: SearchParameters):
+def get_headers_and_params(location_id, dates):
     ## Extract relevant params from raw_info_sub_task
 
     params = {
@@ -60,11 +73,11 @@ def get_headers_and_params(extracted_params: SearchParameters):
         'language': 'iw',
         'retail_partner': 'EIL',
         'city_ids': [
-            '249',
+            location_id,
             'null',
         ],
-        'date_from': '2025-05-02',
-        'date_to': '2025-05-03',
+        'date_from': dates.start_date,
+        'date_to': dates.end_date,
         'sort': 'DateAsc',
         'reco_variant': 'A',
     }
