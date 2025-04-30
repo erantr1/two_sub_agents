@@ -84,7 +84,7 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
                                 json=raw_info_sub_task_mcp.model_dump())
         response.raise_for_status()
         raw_info = response.json()
-        pprint(raw_info)
+        print(json.dumps(raw_info, ensure_ascii=False, indent=2))
     except requests.exceptions.RequestException as e:
         print(f"Error calling raw-info endpoint: {e}")
 
