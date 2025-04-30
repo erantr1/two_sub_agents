@@ -84,12 +84,12 @@ def get_location_id(location):
 
 @app.post("/api/raw-info")
 def get_raw_info(raw_info_sub_task_mcp: dict = Body(...)):
-    print(f"Endpoint called with: {raw_info_sub_task_mcp}")
+    print(f"\nEndpoint called with: {raw_info_sub_task_mcp}")
 
     events_url = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"
 
     extracted_params = extract_search_params(raw_info_sub_task_mcp["content"]).output[0].content[0].parsed
-    print(f'**** extracted: {extracted_params}')
+    print(f'\n**** extracted: {extracted_params}')
 
     location = extracted_params.location
     location_id = get_location_id(location)

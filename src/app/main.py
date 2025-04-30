@@ -38,7 +38,7 @@ def get_task_from_user() -> str:
 def task_topic():
     task = get_task_from_user()
     mcp_task = detect_language_and_create_mcp_task(message_type="task_assignment", task=task)
-    print(f'mcp task:\n{mcp_task}')
+    print(f'\nmcp task:\n{mcp_task.content}\n')
     main_agent.create_and_orchestrate_sub_tasks(mcp_task)
 
 

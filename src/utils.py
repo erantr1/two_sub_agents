@@ -60,14 +60,11 @@ def create_mcp_task(message_type:str, task:str, language: str) -> MCPTask:
         context_id=str(uuid.uuid4()),
         metadata={}
     )
-
     return mcp_task
 
 
 
 def get_headers_and_params(location_id, dates):
-    ## Extract relevant params from raw_info_sub_task
-
     params = {
         'webId': 'web__eventim-co-il',
         'language': 'iw',

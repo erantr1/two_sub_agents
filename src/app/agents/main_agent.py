@@ -76,8 +76,8 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     process_info_sub_task_mcp = create_mcp_task(message_type="process info task", task=process_info_sub_task,
                                             language=mcp_task.lang)
 
-    print(f'task 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
-    pprint(f'task 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
+    print(f'\ntask 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
+    pprint(f'\ntask 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
 
     try:
         response = requests.post("http://localhost:8000/api/raw-info",
