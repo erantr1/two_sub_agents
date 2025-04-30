@@ -16,7 +16,7 @@ mcp = FastMCP("Process Info Sub-Agent")
 
 
 @mcp.tool()
-def process_raw_info(info):
+def process_raw_info(info, process_info_sub_task):
     # instructions = """
     # You are given a JSON with events details.
     # Extract only live shows
@@ -36,9 +36,18 @@ async def handle(ws):
     One‑shot handler: wait for an optional trigger from the main agent,
     build the final summary, send it back, then close.
     """
-    raw = await ws.recv()
-    info = json.loads(raw)
-    result = process_raw_info(info)
+    message = await ws.recv()
+    data = json.loads(message)
+
+    raw = data.get("raw_info")
+    process_info_sub_task_mcp = data.get("task")
+
+    print(f'$$$ raw: {raw}; task: {process_info_sub_task_mcp} $$$')
+
+    result = process_raw_info(raw, process_info_sub_task_mcp["content"])
+
+    print(f'$$$ result: {result} $$$')
+
     await ws.send(json.dumps(result))
 
 

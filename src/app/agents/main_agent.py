@@ -59,11 +59,16 @@ def create_sub_tasks(mcp_task: MCPTask):
 
 
 @mcp.tool()
-def talk(raw_info: dict) -> dict:
+def talk(raw_info: dict, process_info_sub_task_mcp: MCPTask) -> dict:
     async def _ws():
         async with websockets.connect("ws://127.0.0.1:8765") as ws:
-            await ws.send(json.dumps(raw_info))
-            return json.loads(await ws.recv())
+            message = {
+                "raw_info": raw_info,
+                "task": process_info_sub_task_mcp.model_dump()
+            }
+            await ws.send(json.dumps(message))
+            response = await ws.recv()
+            return json.loads(response)
     return asyncio.run(_ws())
 
 
@@ -76,8 +81,8 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     process_info_sub_task_mcp = create_mcp_task(message_type="process info task", task=process_info_sub_task,
                                             language=mcp_task.lang)
 
-    print(f'\ntask 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}')
-    pprint(f'\ntask 1 mcp: {raw_info_sub_task_mcp}\ntask 2 mcp: {process_info_sub_task_mcp}')
+    print(f'\ntask 1: {raw_info_sub_task}\ntask 2: {process_info_sub_task}\n')
+    pprint(f'task 1 mcp: {raw_info_sub_task_mcp} task 2 mcp: {process_info_sub_task_mcp}')
 
     try:
         response = requests.post("http://localhost:8000/api/raw-info",
@@ -86,10 +91,9 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
         raw_info = response.json()
         print(json.dumps(raw_info, ensure_ascii=False, indent=2))
     except requests.exceptions.RequestException as e:
+        raw_info = None
         print(f"Error calling raw-info endpoint: {e}")
 
 
-    # processed_info = talk(raw_info)
-    # pprint(processed_info)
-
-    # process_info_sub_agent.process_raw_info()
+    processed_info = talk(raw_info, process_info_sub_task_mcp)
+    pprint(processed_info)
