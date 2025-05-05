@@ -94,6 +94,6 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
         raw_info = None
         print(f"Error calling raw-info endpoint: {e}")
 
-
+    ## Claude - add error handling - timeout, reconnection, comprehensive exception catching
     processed_info = talk(raw_info, process_info_sub_task_mcp)
     pprint(processed_info)
