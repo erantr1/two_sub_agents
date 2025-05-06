@@ -21,7 +21,7 @@ mcp = FastMCP("Task Orchestration")
 @mcp.tool()
 def detect_language_and_create_mcp_task(message_type:str, task: str) -> MCPTask:
     """Detect the task's language and create a standardized MCP message"""
-    is_reliable, _, details = cld2.detect(task) ## maybe get lang from user
+    is_reliable, _, details = cld2.detect(task)
     if is_reliable and details:
         language_code = details[0][1]
     else:

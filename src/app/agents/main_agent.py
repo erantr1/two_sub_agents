@@ -41,7 +41,7 @@ def create_sub_tasks(mcp_task: MCPTask):
                 - Instructions to perform physical actions that an AI system cannot do
 
                 Sub-tasks division:
-                - The 1st sub-task should focus on gathering raw information through external data sources using REST API calls. This includes identifying what data needs to be retrievedץ It should EXPLICITLY extract and include all key parameters needed for the API query, such as: locations, dates, event types, categories, or any other search criteria mentioned by the user. Be as specific as possible about these parameters as they will be used to construct API calls. This task will be handled by a dedicated agent that specializes in REST API interactions.
+                - The 1st sub-task should focus on gathering raw information through external data sources using REST API calls. This includes identifying what data needs to be retrieved It should EXPLICITLY extract and include all key parameters needed for the API query, such as: locations, dates, event types, categories, or any other search criteria mentioned by the user. Be as specific as possible about these parameters as they will be used to construct API calls. This task will be handled by a dedicated agent that specializes in REST API interactions.
                 - The 2nd sub-task should focus on filtering, processing, and analyzing the raw info collected in sub-task 1 to generate insights tailored to the user's needs. It should EXPLICITLY specify what aspects of the data to prioritize, how to rank or filter results, what preferences to consider, and what format the final recommendations should take. This task will be handled by an agent that specializes in data processing and real-time analysis via WebSocket connections.
 
                 Note: both sub-tasks should be in the same language as the original task.
@@ -75,7 +75,6 @@ def talk(raw_info: dict, process_info_sub_task_mcp: MCPTask) -> dict:
 @mcp.tool()
 def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     raw_info_sub_task, process_info_sub_task = create_sub_tasks(mcp_task)
-
     raw_info_sub_task_mcp = create_mcp_task(message_type="raw info task", task=raw_info_sub_task,
                                             language=mcp_task.lang)
     process_info_sub_task_mcp = create_mcp_task(message_type="process info task", task=process_info_sub_task,
@@ -94,6 +93,6 @@ def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
         raw_info = None
         print(f"Error calling raw-info endpoint: {e}")
 
-    ## Claude - add error handling - timeout, reconnection, comprehensive exception catching
+    ## Add error handling - timeout, reconnection, comprehensive exception catching
     processed_info = talk(raw_info, process_info_sub_task_mcp)
     pprint(processed_info)

@@ -35,23 +35,6 @@ def process_raw_info(info, process_info_sub_task):
     response_model = response.output[0].content[0].text
     # response_model = response.output[0].content[0].parsed
     return response_model
-    # return "success"
-
-    # instructions = """
-    # Given a task description for processing event data, extract:
-    # 1. Filtering criteria (e.g., "live music only", "family-friendly")
-    # 2. Ranking preferences (e.g., "prioritize newer events", "sort by price")
-    # 3. Output format preferences (e.g., "detailed descriptions", "brief list")
-    # """
-
-
-        # instructions="""
-        # Extract specific processing requirements from this task.
-        # Return a JSON with these fields:
-        # - filters: list of criteria to filter events (e.g. "live music only")
-        # - ranking: how to prioritize results (e.g. "by date", "by relevance")
-        # - format: how detailed the response should be (e.g. "detailed", "summary")
-        # """
 
 
 async def handle(ws):
@@ -59,17 +42,14 @@ async def handle(ws):
     One‑shot handler: wait for an optional trigger from the main agent,
     build the final summary, send it back.
     """
-    ## Claude - add validation for the incoming data
+    ## Add validation for the incoming data
     message = await ws.recv()
     data = json.loads(message)
 
     raw = data.get("raw_info")
     process_info_sub_task_mcp = data.get("task")
-
     print(f'$$$ raw: {raw}; task: {process_info_sub_task_mcp} $$$')
-
     result = process_raw_info(raw, process_info_sub_task_mcp["content"])
-
     print(f'$$$ result: {result} $$$')
 
     await ws.send(json.dumps(result))
