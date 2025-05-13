@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field, field_validator
 from fastapi import FastAPI, Body
 from datetime import datetime
+from langfuse.decorators import observe
 import os
 import requests
 
@@ -21,6 +22,7 @@ class Dates(BaseModel):
     end_date: str
 
 
+@observe()
 def extract_search_params(raw_info_sub_task):
     # Use LLM to extract structured parameters
     instructions = """
@@ -41,6 +43,7 @@ def extract_search_params(raw_info_sub_task):
     return response
 
 
+@observe()
 def get_dates(timeframe, location):
     today = datetime.today().strftime("%B %d, %Y")
     instructions = f"""
@@ -59,6 +62,7 @@ def get_dates(timeframe, location):
     return response.output[0].content[0].parsed
 
 
+@observe()
 def get_location_id(location):
     instructions = f"""
     You are given a location name.
@@ -83,6 +87,7 @@ def get_location_id(location):
 
 
 @app.post("/api/raw-info")
+@observe()
 def get_raw_info(raw_info_sub_task_mcp: dict = Body(...)):
     # print(f"\nEndpoint called with: {raw_info_sub_task_mcp}")
     events_url = "https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups"

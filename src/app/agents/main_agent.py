@@ -1,4 +1,5 @@
 import requests
+from langfuse.decorators import observe
 from openai import OpenAI
 from fastmcp import FastMCP
 from dotenv import load_dotenv
@@ -23,6 +24,7 @@ class SubTasks(BaseModel):
 
 
 @mcp.tool()
+@observe()
 def create_sub_tasks(mcp_task: MCPTask):
     instructions = """
                 Determine if the user input is a valid information request or query.
@@ -59,6 +61,7 @@ def create_sub_tasks(mcp_task: MCPTask):
 
 
 @mcp.tool()
+@observe()
 def talk(raw_info: dict, process_info_sub_task_mcp: MCPTask) -> dict:
     async def _ws():
         async with websockets.connect("ws://127.0.0.1:8765") as ws:
@@ -73,6 +76,7 @@ def talk(raw_info: dict, process_info_sub_task_mcp: MCPTask) -> dict:
 
 
 @mcp.tool()
+@observe()
 def create_and_orchestrate_sub_tasks(mcp_task: MCPTask):
     raw_info_sub_task, process_info_sub_task = create_sub_tasks(mcp_task)
     raw_info_sub_task_mcp = create_mcp_task(message_type="raw info task", task=raw_info_sub_task,
