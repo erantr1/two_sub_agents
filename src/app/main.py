@@ -13,12 +13,15 @@ from typing import Optional
 import os
 import logging
 
+from langfuse.decorators import observe
+
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 mcp = FastMCP("Task Orchestration")
 
 @mcp.tool()
+@observe()
 def detect_language_and_create_mcp_task(message_type:str, task: str) -> MCPTask:
     """Detect the task's language and create a standardized MCP message"""
     is_reliable, _, details = cld2.detect(task)
@@ -30,11 +33,13 @@ def detect_language_and_create_mcp_task(message_type:str, task: str) -> MCPTask:
     return mcp_task
 
 
+@observe()
 def get_task_from_user() -> str:
     return input("What task would you like to perform?\n")
 
 
 @mcp.tool()
+@observe()
 def task_topic():
     task = get_task_from_user()
     mcp_task = detect_language_and_create_mcp_task(message_type="task_assignment", task=task)
