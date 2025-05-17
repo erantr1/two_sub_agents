@@ -5,7 +5,10 @@ import pycld2 as cld2
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
-from openai import OpenAI
+# from openai import OpenAI
+from langfuse.openai import OpenAI
+from langfuse.openai import openai
+openai.langfuse_debug = True
 from pydantic import BaseModel
 from src.app.agents import main_agent
 from src.utils import MCPTask, create_mcp_task

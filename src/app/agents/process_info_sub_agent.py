@@ -1,8 +1,12 @@
 import json
 from http.client import responses
 
-from langsmith.utils import with_cache
-from openai import OpenAI
+from langfuse.decorators import observe
+from langfuse.decorators import langfuse_context
+# from openai import OpenAI
+from langfuse.openai import OpenAI
+from langfuse.openai import openai
+openai.langfuse_debug = True
 from fastmcp import FastMCP
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -16,6 +20,7 @@ mcp = FastMCP("Process Info Sub-Agent")
 
 
 @mcp.tool()
+@observe()
 def process_raw_info(info, process_info_sub_task):
     instructions = f"""
     You are given an event data JSON (serialized as a string) and a task description.
@@ -36,25 +41,28 @@ def process_raw_info(info, process_info_sub_task):
     # response_model = response.output[0].content[0].parsed
     return response_model
 
-
+@observe()
 async def handle(ws):
     """
     One‑shot handler: wait for an optional trigger from the main agent,
     build the final summary, send it back.
     """
-    ## Add validation for the incoming data
-    message = await ws.recv()
-    data = json.loads(message)
+    try:
+        ## Add validation for the incoming data
+        message = await ws.recv()
+        data = json.loads(message)
 
-    raw = data.get("raw_info")
-    process_info_sub_task_mcp = data.get("task")
-    print(f'$$$ raw: {raw}; task: {process_info_sub_task_mcp} $$$')
-    result = process_raw_info(raw, process_info_sub_task_mcp["content"])
-    print(f'$$$ result: {result} $$$')
+        raw = data.get("raw_info")
+        process_info_sub_task_mcp = data.get("task")
+        print(f'$$$ raw: {raw}; task: {process_info_sub_task_mcp} $$$')
+        result = process_raw_info(raw, process_info_sub_task_mcp["content"])
+        print(f'$$$ result: {result} $$$')
 
-    await ws.send(json.dumps(result))
+        await ws.send(json.dumps(result))
+    finally:
+        await langfuse_context.flush()
 
-
+@observe()
 async def main():
     # listens on ws://localhost:8765
     async with websockets.serve(handle, "0.0.0.0", 8765):

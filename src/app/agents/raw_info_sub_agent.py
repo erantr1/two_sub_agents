@@ -1,7 +1,10 @@
 from typing import Optional, List, Callable
 import typing
 
-from openai import OpenAI
+# from openai import OpenAI
+from langfuse.openai import OpenAI
+from langfuse.openai import openai
+openai.langfuse_debug = True
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, field_validator
 from fastapi import FastAPI, Body

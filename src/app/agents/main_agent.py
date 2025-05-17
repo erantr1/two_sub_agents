@@ -1,6 +1,9 @@
 import requests
 from langfuse.decorators import observe
-from openai import OpenAI
+# from openai import OpenAI
+from langfuse.openai import OpenAI
+from langfuse.openai import openai
+openai.langfuse_debug = True
 from fastmcp import FastMCP
 from dotenv import load_dotenv
 from pydantic import BaseModel
